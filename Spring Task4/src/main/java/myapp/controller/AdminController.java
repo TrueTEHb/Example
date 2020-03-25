@@ -4,7 +4,9 @@ import myapp.model.Role;
 import myapp.model.User;
 import myapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -12,21 +14,23 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping(value = "/admin**")
+@PreAuthorize("hasAuthority('ADMIN')")
 public class AdminController {
 
     @Autowired
     private UserService userService;
 
     @RequestMapping(value = "/admin")
-    public String adminPage(@RequestParam Map<String, String> param, ModelMap model) {
+    public String adminPage(ModelMap model) {
 
         String name = null;
+        String role = null;
         User user = null;
 
         Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
@@ -34,6 +38,14 @@ public class AdminController {
         if (principal instanceof UserDetails) {
             name = ((UserDetails) principal).getUsername();
             user = userService.getUserByName(name);
+
+            Collection<? extends GrantedAuthority> authorities = ((UserDetails) principal).getAuthorities();
+            for (GrantedAuthority auth : authorities) {
+                if (auth.getAuthority().equals("ADMIN")) {
+                    role = auth.getAuthority();
+                    break;
+                }
+            }
         }
         if (user == null) {
             model.addAttribute("msg", "Not exist");
@@ -41,34 +53,31 @@ public class AdminController {
         }
         model.addAttribute("u_name", name);
         model.addAttribute("user", user);
-        model.addAttribute("role", "ADMIN");
-        return "userPage";
-    }
-
-    @RequestMapping(value = "/list")
-    public String listUser(ModelMap model) {
+        model.addAttribute("role", role);
         model.addAttribute("people", userService.getAllUsers());
         return "adminPage";
     }
 
-    @RequestMapping(value = "/delete")
+    @RequestMapping(value = "/admin/list")
+    public String listUser(ModelMap model) {
+        User logginedUser = getCurrentUser();
+        model.addAttribute("u_name", logginedUser.getUsername());
+        model.addAttribute("people", userService.getAllUsers());
+        return "adminPage";
+    }
+
+    @RequestMapping(value = "/admin/delete")
     public String deleteUser(@RequestParam Long id, ModelMap model) {
         User logginedUser = getCurrentUser();
         Long curId = logginedUser.getId();
 
         if (id != curId) {
+            userService.deleteRole(id);
             userService.deleteUser(id);
+
             model.addAttribute("u_name", logginedUser.getUsername());
-            model.addAttribute("user", logginedUser);
-            List<Role> roles = logginedUser.getRoles();
-            for (Role role : roles) {
-                if (role.getValue().equals("ADMIN")) {
-                    model.addAttribute("role", role.getValue());
-                } else {
-                    model.addAttribute("role", role.getValue());
-                }
-            }
-            return "userPage";
+            model.addAttribute("people", userService.getAllUsers());
+            return "adminPage";
         } else if (id == curId) {
             userService.deleteUser(id);
             model.addAttribute("message", "Your account has been successfully deleted.");
@@ -79,7 +88,7 @@ public class AdminController {
         }
     }
 
-    @RequestMapping(value = "/edit")
+    @RequestMapping(value = "/admin/edit")
     public String editUser(@RequestParam Long id, ModelMap model) {
 
         if (id != null) {
@@ -88,11 +97,7 @@ public class AdminController {
             model.addAttribute("user", user);
             List<Role> roles = user.getRoles();
             for (Role role : roles) {
-                if (role.getValue().equals("ADMIN")) {
-                    model.addAttribute("role", role.getValue());
-                } else {
-                    model.addAttribute("role", role.getValue());
-                }
+                model.addAttribute("role", role.getValue());
             }
             return "PersonForm";
         } else {
@@ -101,13 +106,13 @@ public class AdminController {
         }
     }
 
-    @RequestMapping(value = "/update")
+    @RequestMapping(value = "/admin/update")
     public String updateUser(@RequestParam Long id, @RequestParam Map<String, String> param, ModelMap model) {
         User editUser = userService.getUser(id);
         String name = param.get("name");
         String pass = param.get("password");
         String role = param.get("role").toUpperCase();
-        Long curId = null;
+        Long curId;
         String curRole = "ADMIN";
 
         User loginedUser = getCurrentUser();
@@ -116,13 +121,12 @@ public class AdminController {
         }
         curId = loginedUser.getId();
 
-        if (curId == id) { //изменить свою у запись
+        if (curId == id) { //изменить свою запись
             if (curRole == role) { // роль оставить прежней
                 userService.updateUser(new User(id, name, pass, loginedUser.getRoles()));
-                model.addAttribute("u_name", name);
-                model.addAttribute("user", editUser);
-                model.addAttribute("role", role);
-                return "userPage";
+                model.addAttribute("u_name", loginedUser.getUsername());
+                model.addAttribute("people", userService.getAllUsers());
+                return "adminPage";
             } else {
                 // удалить роль ADMIN для данного пользователя
                 userService.deleteRole(id);
@@ -151,27 +155,27 @@ public class AdminController {
                         editUser.setRoles(Collections.singletonList(newRole));
                         userService.updateUser(new User(id, name, pass, editUser.getRoles()));
 
-                        model.addAttribute("u_name", loginedUser.getUsername());
-                        model.addAttribute("user", loginedUser);
                         model.addAttribute("role", curRole);
+                        model.addAttribute("u_name", loginedUser.getUsername());
+                        model.addAttribute("people", userService.getAllUsers());
 
-                        return "userPage";
+                        return "adminPage";
                     }
                 }
+
                 model.addAttribute("u_name", loginedUser.getUsername());
-                model.addAttribute("user", loginedUser);
-                model.addAttribute("role", curRole);
+                model.addAttribute("people", userService.getAllUsers());
                 userService.updateUser(new User(id, name, pass, editUser.getRoles()));
 
                 return "userPage";
             } else { // добавляет пользователю права админа
                 for (Role r : editUser.getRoles()) { // если были права админа - не изменять роль
                     if (r.getValue().equals(curRole)) {
+
                         model.addAttribute("u_name", loginedUser.getUsername());
-                        model.addAttribute("user", loginedUser);
-                        model.addAttribute("role", curRole);
+                        model.addAttribute("people", userService.getAllUsers());
                         userService.updateUser(new User(id, name, pass, editUser.getRoles()));
-                        return "userPage";
+                        return "adminPage";
                     }
                 }
                 Role newRole = new Role();
@@ -179,10 +183,10 @@ public class AdminController {
                 newRole.setUser(new User(id, name, pass, Collections.singletonList(newRole)));
                 editUser.setRoles(Collections.singletonList(newRole));
                 userService.updateUser(new User(id, name, pass, editUser.getRoles()));
+
                 model.addAttribute("u_name", loginedUser.getUsername());
-                model.addAttribute("user", loginedUser);
-                model.addAttribute("role", curRole);
-                return "userPage";
+                model.addAttribute("people", userService.getAllUsers());
+                return "adminPage";
             }
         }
     }

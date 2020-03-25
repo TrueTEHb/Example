@@ -24,7 +24,5 @@ public interface UserService extends UserDetailsService {
 
     void updateUser(User user);
 
-    User getUserByNamePass(String name, String password);
-
     User getUserByName(String name);
 }

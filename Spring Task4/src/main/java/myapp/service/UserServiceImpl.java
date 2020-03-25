@@ -102,16 +102,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Transactional
-    @Override
-    public User getUserByNamePass(String name, String password) {
-        if (name != null && !name.isEmpty()) {
-            if (password != null && !password.isEmpty()) {
-                return userDao.getUserByNamePass(name, password);
-            }
-        }
-        return null;
-    }
 
     @Override
     public User getUserByName(String name) {

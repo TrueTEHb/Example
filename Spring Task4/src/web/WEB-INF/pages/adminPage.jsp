@@ -9,6 +9,9 @@
     <h2>
         List people
     </h2>
+    <h2>
+        Hello ${u_name}!
+    </h2>
     <tr>
         <th>ID</th>
         <th>Name</th>

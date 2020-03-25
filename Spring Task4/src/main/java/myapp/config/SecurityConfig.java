@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,6 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -31,16 +33,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-
         http
                 // делаем страницу регистрации недоступной для авторизированных пользователей
                 .authorizeRequests()
                 //страницы аутентификаци доступна всем
                 .antMatchers("/", "/login", "/new", "/insert").anonymous()
                 // защищенные URL
-                .antMatchers("/userPage").access("hasAnyRole('USER') and hasAnyRole('ADMIN')")
-                .antMatchers("/adminPage").access("hasAnyRole('ADMIN')").anyRequest().authenticated();
-
+                .antMatchers("/user/**").hasAuthority("USER")
+                .antMatchers("/admin/** ").access("hasAuthority('ADMIN') and hasAuthority('USER')")
+                .anyRequest().authenticated();
 
         http.formLogin()
                 // указываем страницу с формой логина
