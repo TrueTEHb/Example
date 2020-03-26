@@ -22,6 +22,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private LoginSuccessHandler handler;
 
     @Override
     public void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -46,7 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 // указываем страницу с формой логина
                 .loginPage("/login")
                 //указываем логику обработки при логине
-                .successHandler(new LoginSuccessHandler())
+                .successHandler(handler)
                 // указываем action с формы логина
                 .loginProcessingUrl("/login")
                 // Указываем параметры логина и пароля с формы логина
