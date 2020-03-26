@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Login page</title>
+</head>
+<body>
+<div>
+    <h1>Authorisation</h1>
+    <div th:if="${msg != null}">
+        <h2>
+            Wrong username or password
+        </h2>
+    </div>
+    <div th:if="${message != null}">
+        <h2 th:text="${message}"></h2>
+    </div>
+    <form method="post" th:action="@{/login}">
+        <div><label>Login: <input type="text" name="j_username"/></label></div>
+        <div><label>Password: <input type="password" name="j_password"/></label></div>
+        <div><input type="submit" value="Sign In"/></div>
+        <p></p>
+        <a href="/new">Add new user</a>
+    </form>
+</div>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error page</title>
+</head>
+<body>
+<div th:if="${msg != null}">
+    <h2 th:text="${msg}"></h2>
+</div>
+<div th:if="${msg == null}">
+    Some problems
+</div>
+
+<p>
+    <a href="/"/>Return</a>
+</p>
+
+</body>
+</html>

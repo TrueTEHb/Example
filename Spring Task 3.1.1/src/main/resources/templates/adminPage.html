@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin page</title>
+</head>
+<body>
+<table border="1" cellpadding="5">
+    <h2>
+        List people
+    </h2>
+    <h2>
+        Hello
+        <th:block th:text="${u_name}"></th:block>
+    </h2>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Password</th>
+        <th>Role</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <tr th:each="user : ${people}">
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.name}"></td>
+        <td th:text="${user.password}"></td>
+        <td>
+            <label th:each="r : ${user.roles}">
+                <label th:text="${r.value}"></label>
+            </label>
+        </td>
+        <td><a th:href="@{edit/{id}(id=${user.id})}">Edit</a>
+            <a th:href="@{delete/{id}(id=${user.id})}">Delete</a>
+        </td>
+    </tr>
+    </tbody>
+
+    <p>
+    <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Sign out">
+    </form>
+    </p>
+</table>
+
+</body>
+</html>

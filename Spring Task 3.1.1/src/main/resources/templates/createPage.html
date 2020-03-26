@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create</title>
+</head>
+<body>
+<form method="post" th:action="@{/insert}">
+    <div><label>Username: <input type="text" name="j_username"/></label></div>
+    <div><label>Password: <input type="password" name="j_password"/></label></div>
+    <br>
+    <div><input type="submit" value="Create"/></div>
+    <p></p>
+    <a href="/">Back</a>
+</form>
+</body>
+</html>

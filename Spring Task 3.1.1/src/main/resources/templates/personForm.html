@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>User form</title>
+</head>
+<body>
+
+<form th:action="@{/admin/update/{id}(id=${user.id})}" method="post">
+    <table border="1" cellpadding="5">
+        <h2>Edit Person</h2>
+
+        <div th:if="${user != null}">
+            <input type="hidden" name="id" th:value="${user.id}"/>
+        </div>
+        <tr>
+            <th>Name:</th>
+            <td><input type="text" name="name" th:value="${user.name}"></td>
+        </tr>
+        <tr>
+            <th>Password:</th>
+            <td><input type="text" name="password" th:value="${user.password}"></td>
+        </tr>
+        <tr>
+            <th>Role:</th>
+            <td><input type="text" name="role" th:value="${role}"/></td>
+        </tr>
+    </table>
+    <input type="submit" value="Save"/>
+</form>
+</form>
+
+</body>
+</html>
