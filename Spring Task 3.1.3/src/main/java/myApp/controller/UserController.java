@@ -22,22 +22,7 @@ public class UserController {
     @GetMapping(value = "/user/list")
     public ResponseEntity<?> userPage() {
         ModelMap model = new ModelMap();
-        String name;
-        User user = null;
-
-        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authUser.getPrincipal();
-        if (principal instanceof UserDetails) {
-            name = ((UserDetails) principal).getUsername();
-            user = userService.getUserByEmail(name);
-        }
-
-        ModelAndView view = new ModelAndView();
-        view.setViewName("userPage");
-
-        model.addAttribute("user", user);
-        model.addAttribute("role", "USER");
-        model.addAttribute("view", view);
+        model.addAttribute("user", getCurrentUser());
         return ResponseEntity.ok(model);
     }
 
@@ -47,4 +32,17 @@ public class UserController {
         model.setViewName("userPage");
         return model;
     }
+
+    public User getCurrentUser() {
+        Authentication authUser = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authUser.getPrincipal();
+        if (principal instanceof UserDetails) {
+            String email = ((UserDetails) principal).getUsername();
+            User loginedUser = userService.getUserByEmail(email);
+            return loginedUser;
+        } else {
+            return null;
+        }
+    }
+
 }

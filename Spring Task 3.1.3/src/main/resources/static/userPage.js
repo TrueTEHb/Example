@@ -9,9 +9,9 @@ function activeTab() {
     $.ajax({
         type: "GET",
         url: "/user/list",
-        success: function (data, status, param) {
+        success: function (data) {
             var u_email = data.user.email;
-            var u_roles = data.role;
+            var u_roles = data.user.roles[0].value;
 
             $("#user_info").html("<strong class='text-white'>" + u_email + "</strong>" +
                 "<span class='text-white'> with roles: </span>" +

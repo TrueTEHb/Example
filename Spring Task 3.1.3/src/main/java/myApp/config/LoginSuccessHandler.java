@@ -25,7 +25,6 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         } else {
             httpServletResponse.sendRedirect(path);
         }
-        return;
     }
 
     private String redirectToURL(Authentication authentication) {

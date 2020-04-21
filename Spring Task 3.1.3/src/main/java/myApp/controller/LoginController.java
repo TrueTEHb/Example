@@ -1,8 +1,6 @@
 package myApp.controller;
 
 
-import myApp.config.LoginSuccessHandler;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +23,7 @@ public class LoginController {
             model.addAttribute("msg", "Wrong name of password");
             return "login";
         }
-        if (param.get("email") != null && param.get("password") != null){
+        if (param.get("email") != null && param.get("password") != null) {
             model.addAttribute("message", "it works");
         }
 
